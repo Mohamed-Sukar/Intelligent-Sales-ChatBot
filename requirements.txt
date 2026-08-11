@@ -1,0 +1,11 @@
+pandas
+faiss-cpu
+rank-bm25
+langchain
+langchain-openai
+langchain-core
+gradio
+sentence-transformers
+nltk
+python-dotenv
+requests
