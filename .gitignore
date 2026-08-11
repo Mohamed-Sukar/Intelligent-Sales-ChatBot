@@ -1,0 +1,17 @@
+# Environment variables
+.env
+
+# SQLite databases
+*.db
+chatbot.db
+
+# Search indexes
+*.pkl
+*.index
+faiss.index
+bm25_index.pkl
+
+# Python caches
+__pycache__/
+*.py[cod]
+*$py.class
