@@ -24,7 +24,7 @@ An end-to-end AI-powered **Sales Representative ChatBot** for an e-commerce comp
 ## Project Structure
 
 ```text
-The Track Project/
+Intelligent Sales ChatBot/
 │
 ├── .env                       # API Keys (OPENROUTER_API_KEY, GEMINI_API_KEY, ADMIN_PASSWORD)
 ├── .gitignore                 
@@ -54,7 +54,7 @@ The Track Project/
 1. **Clone the repository:**
    ```bash
    git clone <repository_url>
-   cd "The Track Project"
+   cd "Intelligent Sales ChatBot"
    ```
 
 2. **Install dependencies:**
@@ -65,9 +65,9 @@ The Track Project/
 3. **Set up Environment Variables:**
    Create a `.env` file in the root directory and add your API keys:
    ```env
-   OPENROUTER_API_KEY=your_openrouter_key
-   GEMINI_API_KEY=your_gemini_key
-   ADMIN_PASSWORD=your_secure_password
+   OPENROUTER_API_KEY= your_openrouter_key
+   GEMINI_API_KEY=     your_gemini_key
+   ADMIN_PASSWORD=     your_secure_password  --> to update the products in database.
    ```
 
 4. **Prepare the Data & Indexes:**
