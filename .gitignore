@@ -1,17 +1,31 @@
-# Environment variables
+# Environments
 .env
+.env.*
+!.env.example
 
-# SQLite databases
-*.db
-chatbot.db
-
-# Search indexes
-*.pkl
-*.index
-faiss.index
-bm25_index.pkl
-
-# Python caches
+# Python
 __pycache__/
 *.py[cod]
 *$py.class
+*.so
+
+# Jupyter Notebook
+.ipynb_checkpoints/
+
+# Virtual Environments
+venv/
+env/
+.venv/
+.env_dir/
+
+# OS generated files
+.DS_Store
+Thumbs.db
+
+# Project Specific Database / Search Indexes
+database/faiss.index
+database/bm25_index.pkl
+database/chatbot.db
+
+# If you don't want to upload large datasets to GitHub, uncomment the next line:
+# products_clean.csv
