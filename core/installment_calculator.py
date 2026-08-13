@@ -36,8 +36,8 @@ class InstallmentCalculator:
         Generates standard 3, 6, and 12-month installment breakdowns for a product price.
         """
         plan_terms = [
-            (3, 0.10),   # 3 months, 2% interest
-            (6, 0.15),   # 6 months, 5% interest
-            (12, 0.20)   # 12 months, 10% interest
+            (3, 0.10),   # 3 months, 10% interest
+            (6, 0.15),   # 6 months, 15% interest
+            (12, 0.20)   # 12 months, 20% interest
         ]
         return [self.calculate_installment(price, months=m, interest_rate=r) for m, r in plan_terms]
