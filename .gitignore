@@ -28,4 +28,4 @@ database/bm25_index.pkl
 database/chatbot.db
 
 # If you don't want to upload large datasets to GitHub, uncomment the next line:
-# products_clean.csv
+# data/products_clean.csv

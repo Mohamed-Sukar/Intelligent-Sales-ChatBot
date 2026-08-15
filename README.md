@@ -8,7 +8,7 @@ This project has been heavily refactored for efficiency, removing complex databa
 
 ### Features
 
-- **All-in-One Orchestrator**: The entire backend logic (Retrieval, LLM Management, Memory, Business Logic) and frontend UI are now elegantly contained in a single `app.py` script.
+- **Modular Orchestrator**: The entire backend logic (Retrieval, LLM Management, Memory, Business Logic) and frontend UI are elegantly structured in a professional `core/` package, with a simple `app.py` entry point.
 - **Dual-API LLM Architecture**: Uses OpenRouter (Primary) via LangChain, and automatically falls back to a direct POST request to the Google Gemini API (Backup) ensuring maximum uptime.
 - **Hybrid Product Search (RAG)**: Combines Dense Semantic Search (FAISS + `all-MiniLM-L6-v2`) and Sparse Keyword Search (BM25) to retrieve the most relevant products directly from an in-memory dataset, merged via Reciprocal Rank Fusion (RRF).
 - **Ghost-Card Filtering**: The system actively parses the LLM's response to ensure only products explicitly mentioned by the AI are rendered as HTML cards in the UI.
@@ -24,14 +24,26 @@ Intelligent Sales ChatBot/
 │
 ├── .env                       # API Keys (OPEN_ROUTER_KEY, GEMINI_API_KEY)
 ├── .env.example               # Example environment variables file
-├── app.py                     # Main Orchestrator (Backend classes + Gradio Frontend)
-├── products_clean.csv         # Cleaned e-commerce dataset loaded into memory
+├── app.py                     # Entry point for Gradio Frontend
+│
+├── core/                      # Backend package
+│   ├── config.py              # Environment variables & constants
+│   ├── data_loader.py         # CSV loading logic
+│   ├── retrieval.py           # FAISS + BM25 search engine
+│   ├── llm.py                 # LLM API connections
+│   ├── pipeline.py            # RAG orchestration, memory, and handoff
+│   └── ui.py                  # Gradio frontend components
+│
+├── data/                      # Dataset directory
+│   └── products_clean.csv     # Cleaned e-commerce dataset
 │
 ├── database/                  # Auto-generated Search Indexes
 │   ├── faiss.index            # FAISS dense search index
 │   └── bm25_index.pkl         # Pickled BM25 keyword search index
 │
 └── notebooks/                 # Jupyter notebooks for data exploration and testing
+    ├── 01_data_exploration.ipynb
+    └── 02_full_pipeline.ipynb
 ```
 
 ## ⚙️ Setup & Installation
