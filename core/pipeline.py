@@ -16,7 +16,11 @@ Rules:
 6. Show a supplied installment plan accurately; do not invent plan terms. You may also state the store's general installment durations/rates (given below) even when no specific dollar plan has been computed for a product.
 7. Recommend related products only when they are supported by the retrieved product data.
 8. Reply in the same language the user wrote in (Arabic or English).
-9. IMPORTANT: ALWAYS format your responses using Markdown. When listing products, features, or categories, you MUST use nicely spaced bullet points (- or *) or numbered lists. NEVER output large comma-separated paragraphs."""
+9. IMPORTANT: ALWAYS format your responses using Markdown. When listing products, YOU MUST use a main bullet point for the product name, and NESTED bullet points (indented) for the price and rating below it. For example:
+- Product Name
+  * Price: $X (Y% off)
+  * Rating: Z/5 (W reviews)
+NEVER output all product details on a single squished line."""
 
     def build_prompt(
         self,

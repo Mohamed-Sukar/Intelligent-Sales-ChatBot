@@ -3,7 +3,7 @@ from __future__ import annotations
 import html as html_lib
 import re
 import uuid
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, List
 
 import streamlit as st
 from st_copy import copy_button
@@ -20,9 +20,10 @@ import os
 #  Page config  (MUST be first Streamlit command)
 # ──────────────────────────────────────────────────────────────────────────────
 def setup_page():
+    icon0_path = os.path.join(os.path.dirname(__file__), "..", "data", "icon0.png")
     st.set_page_config(
         page_title="SmartSales | AI Shopping Concierge",
-        page_icon="icon0.png",
+        page_icon=icon0_path if os.path.exists(icon0_path) else "icon0.png",
         layout="wide",
         initial_sidebar_state="expanded",
     )
@@ -64,17 +65,18 @@ def setup_page():
     }
     section[data-testid="stSidebar"] > div { padding: 1.6rem 1.15rem; }
 
-    .brand { display:flex; align-items:center; gap:.7rem; margin: .15rem 0 2.8rem; }
+    .brand { display:flex; align-items:center; gap:1.8rem; margin: .15rem 0 2.8rem; }
     .brand-mark {
-      width: 48px; height: 48px; border-radius: 13px; display:flex; align-items:center; justify-content:center;
-      background: linear-gradient(135deg, var(--accent), #6d63ff); color:#fff; font-size: 1.22rem; box-shadow: 0 8px 24px rgba(121,93,255,.32);
+      width: 48px; height: 48px; display:flex; align-items:center; justify-content:center;
+    }
+    .brand-mark img {
+      transform: scale(1.6);
     }
     .brand-name { font: 700 1rem 'Space Grotesk', sans-serif; letter-spacing: .14em; }
     .brand-sub { color: var(--muted-2); font-size: .67rem; letter-spacing: .12em; text-transform: uppercase; margin-top: .15rem; }
     .hero-title { font: 700 clamp(2rem, 4vw, 3.6rem)/1.04 'Space Grotesk', sans-serif; letter-spacing:-.055em; margin:0; max-width: 780px; }
     .hero-title span { color: var(--accent); }
     .hero-copy { color: var(--muted); font-size:1.02rem; line-height:1.7; max-width: 720px; margin:1rem 0 1.7rem; }
-    .panel { background:var(--panel); border:1px solid var(--line); border-radius:24px; padding:1.35rem; box-shadow: 0 24px 70px rgba(0,0,0,.18); backdrop-filter: blur(16px); }
     .panel-heading { display:flex; align-items:center; justify-content:space-between; gap:1rem; padding-bottom:1rem; border-bottom:1px solid var(--line); margin-bottom:1rem; }
     .panel-title { font:600 1rem 'Space Grotesk',sans-serif; letter-spacing:-.02em; }
     .panel-note { color:var(--muted-2); font-size:.74rem; }
@@ -83,7 +85,10 @@ def setup_page():
     .handoff-button > button { border-color:rgba(255,125,146,.45); color:#ffb6c3; background:rgba(255,125,146,.08); }
     .handoff-button > button:hover { background:rgba(255,125,146,.17); border-color:var(--danger); }
     div[data-testid="stChatMessage"] { background:transparent; padding: .75rem 0; }
-    div[data-testid="stChatMessage"] [data-testid="stMarkdownContainer"] { line-height:1.65; }
+    div[data-testid="stChatMessage"] [data-testid="stMarkdownContainer"] { line-height: 1.7; }
+    div[data-testid="stChatMessage"] [data-testid="stMarkdownContainer"] p,
+    div[data-testid="stChatMessage"] [data-testid="stMarkdownContainer"] ul { margin-bottom: 1rem; }
+    div[data-testid="stChatMessage"] [data-testid="stMarkdownContainer"] li { margin-bottom: 0.6rem; }
     .chat-empty { text-align:center; padding: 3.4rem 1.5rem; color:var(--muted); }
     .chat-empty-icon { font-size:2.4rem; color:var(--accent); margin-bottom:.8rem; }
     .chat-empty h3 { color:var(--ink); font:600 1.25rem 'Space Grotesk',sans-serif; margin:.3rem 0 .5rem; }
@@ -92,32 +97,25 @@ def setup_page():
     .shelf-kicker { color: var(--accent-2); font-size: .66rem; font-weight: 700; letter-spacing: .16em; text-transform: uppercase; }
     .shelf-title { color: var(--ink); font: 600 1.08rem 'Space Grotesk', sans-serif; margin: .25rem 0 .2rem; }
     .shelf-copy { color: var(--muted); font-size: .76rem; line-height: 1.5; margin-bottom: .85rem; }
-    .product-card { position: relative; background: rgba(255,255,255,.035); border: 1px solid rgba(255,255,255,.09); border-radius: 15px; padding: .88rem .95rem; margin: .55rem 0; transition: border-color .2s ease, background .2s ease, transform .2s ease; cursor: pointer; display: flex; gap: 1rem; align-items: stretch; }
+    .product-card { position: relative; background: rgba(255,255,255,.035); border: 1px solid rgba(255,255,255,.09); border-radius: 15px; padding: .88rem .95rem .88rem .95rem; margin: .55rem 0 0 0; transition: border-color .2s ease, background .2s ease, transform .2s ease; cursor: pointer; display: flex; gap: 1rem; align-items: stretch; }
     .product-card:hover { background: rgba(255,255,255,.065); border-color: rgba(170,140,255,.45); transform: translateX(2px); }
     .product-card--featured { background: linear-gradient(110deg, rgba(170,140,255,.13), rgba(255,255,255,.035) 70%); border-color: rgba(170,140,255,.3); }
     .product-card--selected { background: rgba(170,140,255,.12); border-color: rgba(170,140,255,.6); box-shadow: 0 0 20px rgba(170,140,255,.15); }
     .product-image { width: 90px; height: 90px; flex-shrink: 0; border-radius: 12px; overflow: hidden; background: #fff; display: flex; align-items: center; justify-content: center; }
     .product-image img { width: 100%; height: 100%; object-fit: cover; }
     .product-body { flex-grow: 1; display: flex; flex-direction: column; justify-content: space-between; }
-    .cart-icon-btn { background: #3b5bdb; color: white; width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 1rem; box-shadow: 0 4px 12px rgba(59,91,219,.3); }
-    .product-category { color: var(--accent-2); font-size: .62rem; letter-spacing: .12em; text-transform: uppercase; font-weight: 700; }
     .product-title { font: 600 .92rem 'Space Grotesk', sans-serif; color: var(--ink); margin: .25rem 0 .28rem; line-height: 1.25; }
     .product-description { color: var(--muted); font-size: .73rem; line-height: 1.45; margin-bottom: .55rem; }
-    .product-bottom { display:flex; align-items: baseline; justify-content: space-between; gap:.7rem; }
+    .product-bottom { display:flex; align-items: center; justify-content: space-between; gap:.7rem; }
     .product-price { font-size: 1.08rem; font-weight: 700; color: var(--ink); white-space: nowrap; }
     .product-price-old { color: var(--muted-2); text-decoration: line-through; font-size: .7rem; margin-left: .3rem; }
     .product-save { color: var(--accent-2); font-size: .68rem; white-space: nowrap; }
-    .product-meta { color: var(--muted); font-size: .68rem; white-space: nowrap; }
     .product-footnote { color: var(--muted-2); font-size: .68rem; padding-top: .65rem; margin-top: .7rem; border-top: 1px solid var(--line); }
     .product-available { color: var(--accent-2); font-size: .62rem; font-weight: 700; letter-spacing: .1em; background: rgba(84,214,197,.08); border: 1px solid rgba(84,214,197,.2); padding: .15rem .45rem; border-radius: 20px; white-space: nowrap; }
     .sidebar-label { color:var(--muted-2); font-size:.7rem; font-weight:700; letter-spacing:.14em; text-transform:uppercase; margin:1.3rem 0 .6rem; }
     hr { border-color:var(--line); }
     [data-testid="stChatInput"] { background:rgba(16,19,42,.9); }
     [data-testid="stChatInput"] textarea { color:var(--ink); }
-
-    /* Selection bar */
-    .selection-bar { background:rgba(170,140,255,.08); border:1px solid rgba(170,140,255,.25); border-radius:12px; padding:.7rem 1rem; margin-bottom:.5rem; display:flex; align-items:center; justify-content:space-between; gap:.5rem; }
-    .selection-text { font-size:.78rem; color:var(--accent); line-height:1.5; }
 
     /* Chat message bubbles */
     [data-testid="stChatMessageContent"] {
@@ -145,24 +143,47 @@ def setup_page():
     .stButton > button p { font-size: .82rem; }
     [data-testid="stChatMessage"] { gap: .7rem; }
 
-    /* Make the whole card clickable via invisible Streamlit button */
-    div[data-testid="stVerticalBlock"]:has(.is-product-card-container) {
-        position: relative;
-        gap: 0 !important;
+    /* Product card with overlapping Ask More button */
+    .product-card-wrapper {
+        margin-bottom: .55rem;
     }
-    div[data-testid="stVerticalBlock"]:has(.is-product-card-container) div[data-testid="stButton"] {
-        position: absolute;
-        top: 0;
-        left: 0;
-        width: 100%;
-        height: 100%;
+    .product-card-wrapper > div[data-testid="element-container"]:has(.pc-marker) {
+        display: none !important;
+    }
+    .product-card-wrapper div[data-testid="stButton"] {
+        margin-top: -22px;
+        display: flex !important;
+        width: 100% !important;
+        justify-content: flex-end !important;
+        padding-right: 14px;
+        position: relative;
         z-index: 10;
     }
-    div[data-testid="stVerticalBlock"]:has(.is-product-card-container) div[data-testid="stButton"] button {
-        width: 100%;
-        height: 100%;
-        opacity: 0;
-        cursor: pointer;
+    .product-card-wrapper div[data-testid="stButton"] button {
+        background: rgba(30, 34, 60, .92) !important;
+        border: 1px solid rgba(255,255,255,.12) !important;
+        border-radius: 25px !important;
+        padding: .45rem 1.4rem !important;
+        color: var(--ink) !important;
+        font-size: .82rem !important;
+        min-height: 2.3rem !important;
+        width: auto !important;
+        backdrop-filter: blur(8px);
+        box-shadow: 0 4px 15px rgba(0,0,0,.3);
+        transition: all .25s ease !important;
+        white-space: nowrap;
+    }
+    .product-card-wrapper div[data-testid="stButton"] button:hover {
+        background: rgba(170,140,255,.18) !important;
+        border-color: rgba(170,140,255,.5) !important;
+        transform: translateY(-1px) !important;
+        box-shadow: 0 6px 20px rgba(170,140,255,.2) !important;
+    }
+    /* Selected state for overlap button */
+    .product-card-wrapper.card-selected div[data-testid="stButton"] button {
+        background: rgba(170,140,255,.22) !important;
+        border-color: rgba(170,140,255,.6) !important;
+        color: #fff !important;
     }
     
     @media (max-width: 900px) {
@@ -230,7 +251,20 @@ def clean_product_name_formatting(message: str, products: List[Dict[str, Any]]) 
     return cleaned
 
 
-def render_product_cards(products: List[Dict[str, Any]], selected_ids: set, unique_prefix: str = "") -> None:
+def toggle_selection(product_id, product_title):
+    if product_id in st.session_state.selected_products:
+        del st.session_state.selected_products[product_id]
+    else:
+        st.session_state.selected_products[product_id] = product_title
+
+
+def clear_all_selected_products() -> None:
+    """Clear all currently selected products."""
+    if "selected_products" in st.session_state:
+        st.session_state.selected_products = {}
+
+
+def render_product_cards(products: List[Dict[str, Any]], unique_prefix: str = "") -> None:
     """Render product cards in the Shopping Brief panel."""
     if not products:
         return
@@ -238,40 +272,37 @@ def render_product_cards(products: List[Dict[str, Any]], selected_ids: set, uniq
     for index, product in enumerate(products[:5], start=1):
         pid = str(product.get("product_id", ""))
         title = safe_text(product.get("title", "Product"))
-        category = safe_text(product.get("category", "Store pick"))
         description = safe_text(product.get("product_description", ""))
         if len(description) > 150:
             description = description[:147].rsplit(" ", 1)[0] + "…"
         price = float(product.get("final_price", 0) or 0)
         initial_price = float(product.get("initial_price", 0) or 0)
-        rating = product.get("rating", "—")
-        count = product.get("ratings_count", "—")
-        savings = max(0, initial_price - price) if initial_price > price else 0
-
         price_line = f'<span class="product-price">${price:,.2f}</span>'
         if initial_price > price:
             price_line += f'<span class="product-price-old">${initial_price:,.2f}</span>'
-        save_line = f'<span class="product-save">Save ${savings:,.2f}</span>' if savings else ''
-
         images_str = product.get("images", "")
-        image_url = images_str.split(",")[0].strip('"\'') if images_str else ""
+        image_url = images_str.split(",")[0].strip("\"'") if images_str else ""
         image_html = f'<div class="product-image"><img src="{image_url}" onerror="this.style.display=\'none\'" /></div>' if image_url else '<div class="product-image" style="background: rgba(255,255,255,0.05);"></div>'
 
-        is_selected = pid in selected_ids
+        is_selected = pid in st.session_state.selected_products
         card_class = "product-card"
         if index == 1:
             card_class += " product-card--featured"
         if is_selected:
             card_class += " product-card--selected"
             
-        btn_label = "✅ Selected" if is_selected else "💬 Ask More"
-        label_color = "#4ade80" if is_selected else "#3b5bdb"
-        label_bg = "rgba(74,222,128,0.1)" if is_selected else "rgba(59,91,219,0.1)"
+        btn_label = "Selected ✅" if is_selected else "Ask More 💬"
+        btn_type = "primary" if is_selected else "secondary"
+        wrapper_class = "product-card-wrapper card-selected" if is_selected else "product-card-wrapper"
 
         with st.container():
-            st.markdown('<div class="is-product-card-container"></div>', unsafe_allow_html=True)
+            # Marker div for JS to identify and wrap this container
             st.markdown(
-                f'''<div class="{card_class}">
+                f'<div class="pc-marker" data-wrapper-class="{wrapper_class}" style="display:none;"></div>',
+                unsafe_allow_html=True,
+            )
+            st.markdown(
+                f"""<div class="{card_class}" style="padding-bottom: 1.6rem;">
                     {image_html}
                     <div class="product-body">
                         <div style="display:flex;justify-content:space-between;align-items:flex-start;">
@@ -281,22 +312,20 @@ def render_product_cards(products: List[Dict[str, Any]], selected_ids: set, uniq
                         <div class="product-description" style="margin: 0.2rem 0 0.5rem 0;">{description or "A relevant pick from the current catalogue."}</div>
                         <div class="product-bottom" style="align-items:center; display:flex; justify-content:space-between;">
                             <div style="color: #3b5bdb; font-weight: 700; font-size: 1.1rem;">{price_line}</div>
-                            <div style="font-weight: 600; color: {label_color}; background: {label_bg}; padding: 0.25rem 0.8rem; border-radius: 20px; font-size: 0.85rem;">
-                                {btn_label}
-                            </div>
                         </div>
                     </div>
-                </div>''',
+                </div>""",
                 unsafe_allow_html=True,
             )
-            # Invisible Ask More button overlaid on the card
             btn_key = f"ask_{unique_prefix}_{pid}_{index}" if unique_prefix else f"ask_{pid}_{index}"
-            if st.button("invisible", key=btn_key, use_container_width=True):
-                if is_selected:
-                    st.session_state.selected_products.discard(pid)
-                else:
-                    st.session_state.selected_products.add(pid)
-                st.rerun()
+            st.button(
+                label=btn_label,
+                key=btn_key,
+                on_click=toggle_selection,
+                args=(pid, title),
+                type=btn_type,
+                use_container_width=False
+            )
 
     st.markdown(
         '<div class="product-footnote">Prices and ratings are taken from the current catalogue.</div>',
@@ -310,17 +339,13 @@ def render_product_cards(products: List[Dict[str, Any]], selected_ids: set, uniq
 def reset_conversation() -> None:
     st.session_state.session_id = str(uuid.uuid4())
     st.session_state.messages = []
-    st.session_state.current_products = []
-    st.session_state.selected_products = set()
+    st.session_state.selected_products = {}
     st.session_state.frustration_count = 0
-    st.session_state.last_result = None
 
 
 def initialize_state() -> None:
     if "session_id" not in st.session_state:
         reset_conversation()
-    if "product_lookup" not in st.session_state:
-        st.session_state.product_lookup = {}
 
 
 # ──────────────────────────────────────────────────────────────────────────────
@@ -336,14 +361,9 @@ def process_user_message(text: str, pipeline) -> None:
     # Build backend prompt with product context injection
     backend_prompt = text
     if st.session_state.selected_products:
-        context_parts = []
-        for pid in st.session_state.selected_products:
-            p = st.session_state.product_lookup.get(pid)
-            if p:
-                context_parts.append(f"'{p['title']}' (ID: {pid})")
-        if context_parts:
-            context_prefix = f"[Context: User is asking about these selected products: {', '.join(context_parts)}]\n\n"
-            backend_prompt = context_prefix + text
+        selected_titles_str = ", ".join(st.session_state.selected_products.values())
+        injected_context = f"\n\n[System Note: The user has selected these products from the UI for context: {selected_titles_str}]\n"
+        backend_prompt = text + injected_context
 
     # Dual-strike frustration logic
     suppress_auto = False
@@ -380,14 +400,6 @@ def process_user_message(text: str, pipeline) -> None:
         "content": reply,
         "products": result.get("products", [])
     })
-    st.session_state.current_products = result.get("products", [])
-    st.session_state.last_result = result
-
-    # Update product lookup with any new products
-    for p in st.session_state.current_products:
-        pid = str(p.get("product_id", ""))
-        if pid:
-            st.session_state.product_lookup[pid] = p
 
 
 def process_handoff(pipeline) -> None:
@@ -403,8 +415,6 @@ def process_handoff(pipeline) -> None:
     st.session_state.messages.append(
         {"id": str(uuid.uuid4()), "role": "assistant", "content": result.get("message", ""), "products": []}
     )
-    st.session_state.current_products = []
-    st.session_state.last_result = result
 
 
 # ──────────────────────────────────────────────────────────────────────────────
@@ -415,15 +425,11 @@ def render_app():
     initialize_state()
     products_db, pipeline = load_pipeline()
 
-    # Build product lookup from DB (once)
-    if not st.session_state.product_lookup:
-        for p in products_db:
-            st.session_state.product_lookup[str(p.get("product_id"))] = p
-
     # ── Sidebar ──────────────────────────────────────────────────────────────
     import base64
-    import os
-    icon_path = os.path.join(os.path.dirname(__file__), "..", "icon.png")
+    icon_path = os.path.join(os.path.dirname(__file__), "..", "data", "icon.png")
+    if not os.path.exists(icon_path):
+        icon_path = os.path.join(os.path.dirname(__file__), "..", "icon.png")
     try:
         with open(icon_path, "rb") as image_file:
             encoded_string = base64.b64encode(image_file.read()).decode()
@@ -434,7 +440,7 @@ def render_app():
     with st.sidebar:
         st.markdown(
             f'<div class="brand"><div class="brand-mark">{img_html}</div><div>'
-            '<div class="brand-name">SMARTSALES</div>'
+            '<div class="brand-name">  SMARTSALES</div>'
             '<div class="brand-sub">AI shopping concierge</div>'
             "</div></div>",
             unsafe_allow_html=True,
@@ -474,26 +480,6 @@ def render_app():
         unsafe_allow_html=True,
     )
 
-    # Selection indicator
-    if st.session_state.selected_products:
-        selected_titles = []
-        for pid in list(st.session_state.selected_products):
-            p = st.session_state.product_lookup.get(pid)
-            if p:
-                selected_titles.append(p.get("title", "Unknown"))
-        if selected_titles:
-            sel_col, clear_col = st.columns([8, 2])
-            with sel_col:
-                st.markdown(
-                    f'<div class="selection-bar"><div class="selection-text">'
-                    f'🔗 <strong>Asking about:</strong> {", ".join(selected_titles)}</div></div>',
-                    unsafe_allow_html=True,
-                )
-            with clear_col:
-                if st.button("Clear Selection", use_container_width=True):
-                    st.session_state.selected_products = set()
-                    st.rerun()
-
     # Two-column layout: Chat | Shopping Brief
     chat_col, insight_col = st.columns([1.55, 1], gap="large")
 
@@ -520,6 +506,27 @@ def render_app():
                         with col2:
                             copy_button(message["content"], key=f"copy_btn_{i}")
 
+        if st.session_state.selected_products:
+            col_text, col_btn = st.columns([0.83, 0.17])
+            with col_text:
+                selected_titles = list(st.session_state.selected_products.values())
+                st.markdown(
+                    f"<div style='padding-top: 5px; font-size: 0.85rem; color: var(--muted);'>"
+                    f"<strong style='color: var(--accent);'>Selected:</strong> {', '.join(selected_titles)}"
+                    f"</div>",
+                    unsafe_allow_html=True,
+                )
+            with col_btn:
+                st.markdown('<div class="unselect-btn">', unsafe_allow_html=True)
+                st.button(
+                    "Unselect All",
+                    key="clear_all_selected",
+                    on_click=clear_all_selected_products,
+                    help="Remove all selected products",
+                    use_container_width=True,
+                )
+                st.markdown('</div>', unsafe_allow_html=True)
+
         user_prompt = st.chat_input("Ask about a product, price, or installment plan…")
         if user_prompt:
             process_user_message(user_prompt, pipeline)
@@ -527,6 +534,14 @@ def render_app():
 
     with insight_col:
         with st.container(border=True):
+            st.markdown(
+                '<div class="panel-heading"><div>'
+                '<div class="panel-title">Your shopping brief</div>'
+                '<div class="panel-note">A quieter view of the details</div>'
+                '</div><div style="color:var(--accent);font-size:1.2rem">◌</div></div>',
+                unsafe_allow_html=True,
+            )
+            
             has_cards = any(msg.get("products") for msg in st.session_state.messages if msg["role"] == "assistant")
             if has_cards:
                 for i, msg in enumerate(st.session_state.messages):
@@ -534,15 +549,8 @@ def render_app():
                         msg_id = msg.get("id", "")
                         with st.container():
                             st.markdown(f'<div id="card-{msg_id}" class="sync-card"></div>', unsafe_allow_html=True)
-                            render_product_cards(msg["products"], st.session_state.selected_products, unique_prefix=msg_id)
+                            render_product_cards(msg["products"], unique_prefix=msg_id)
             else:
-                st.markdown(
-                    '<div class="panel-heading"><div>'
-                    '<div class="panel-title">Your shopping brief</div>'
-                    '<div class="panel-note">A quieter view of the details</div>'
-                    '</div><div style="color:var(--accent);font-size:1.2rem">◌</div></div>',
-                    unsafe_allow_html=True,
-                )
                 st.markdown(
                     '<div class="product-shelf"><div class="shelf-kicker">SHORTLIST</div>'
                     '<div class="shelf-title">Your shopping brief</div>'
@@ -560,11 +568,28 @@ def render_app():
     js_code = f"""
     <script>
     // Execution ID: {time.time()}
-    const parent = window.parent.document;
-    
-    // --- 1. Card Alignment Logic ---
+    function wrapCards() {{
+        try {{
+            const parent = window.parent.document;
+            const markers = parent.querySelectorAll('.pc-marker');
+            markers.forEach(marker => {{
+                // The marker is inside a stMarkdownContainer -> stMarkdown -> element -> stVerticalBlock
+                // We need to find the st.container() wrapper that holds the marker, card HTML, and button
+                const container = marker.closest('[data-testid="stVerticalBlock"]');
+                if (!container) return;
+                const wrapperClass = marker.getAttribute('data-wrapper-class') || 'product-card-wrapper';
+                if (!container.classList.contains('product-card-wrapper')) {{
+                    wrapperClass.split(' ').forEach(cls => container.classList.add(cls));
+                    // Remove gap from the container so card and button are tight together
+                    container.style.gap = '0';
+                }}
+            }});
+        }} catch(e) {{}}
+    }}
+
     function alignCards() {{
         try {{
+            const parent = window.parent.document;
             const resps = parent.querySelectorAll('.sync-resp');
             if (resps.length === 0) return;
             
@@ -573,10 +598,14 @@ def render_app():
                 const cardMarker = parent.getElementById('card-' + id);
                 if (resp && cardMarker) {{
                     const respRect = resp.getBoundingClientRect();
+                    
+                    // Find the container that holds both the marker and the rendered cards
                     const block = cardMarker.closest('[data-testid="stVerticalBlock"]');
                     if (!block) return;
                     
                     const blockRect = block.getBoundingClientRect();
+                    
+                    // We only push down. If it's already lower (due to previous cards), we leave it.
                     if (blockRect.top < respRect.top) {{
                         const diff = respRect.top - blockRect.top;
                         const currentMargin = parseFloat(window.getComputedStyle(block).marginTop) || 0;
@@ -587,50 +616,12 @@ def render_app():
         }} catch(e) {{}}
     }}
     
-    setTimeout(alignCards, 50);
-    setTimeout(alignCards, 300);
-    setTimeout(alignCards, 1000);
-    setTimeout(alignCards, 2000);
-    
-    // --- 2. Immediate Card Selection UI ---
-    // Ensure we only attach the listener once to avoid multiple toggles
-    if (!parent.window.smartSalesUIInitialized) {{
-        parent.addEventListener('click', function(e) {{
-            // Find if the click is on an invisible button over a card
-            const block = e.target.closest('[data-testid="stVerticalBlock"]');
-            if (!block) return;
-            
-            const isCardBlock = block.querySelector('.is-product-card-container');
-            const isButton = e.target.closest('button');
-            
-            if (isCardBlock && isButton) {{
-                const card = block.querySelector('.product-card');
-                if (card) {{
-                    // Immediately toggle CSS class for instant visual feedback
-                    card.classList.toggle('product-card--selected');
-                    
-                    // Immediately update the label
-                    const labelBtn = card.querySelector('.product-bottom > div:last-child');
-                    if (labelBtn) {{
-                        if (card.classList.contains('product-card--selected')) {{
-                            labelBtn.innerHTML = "✅ Selected";
-                            labelBtn.style.color = "#4ade80";
-                            labelBtn.style.background = "rgba(74,222,128,0.1)";
-                        }} else {{
-                            labelBtn.innerHTML = "💬 Ask More";
-                            labelBtn.style.color = "#3b5bdb";
-                            labelBtn.style.background = "rgba(59,91,219,0.1)";
-                        }}
-                    }}
-                }}
-            }}
-        }});
-        parent.window.smartSalesUIInitialized = true;
-    }}
+    function runAll() {{ wrapCards(); alignCards(); }}
+    setTimeout(runAll, 50);
+    setTimeout(runAll, 300);
+    setTimeout(runAll, 800);
+    setTimeout(runAll, 1500);
     </script>
     """
     components.html(js_code, height=0)
 
-
-# Alias for backward compatibility
-create_app = render_app

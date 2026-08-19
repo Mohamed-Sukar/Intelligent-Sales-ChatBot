@@ -15,7 +15,7 @@ This project has been heavily refactored for efficiency, removing complex databa
 - **Smart Context & Memory**: The bot injects the user's recent chat history and previously viewed products into the LLM prompt to maintain a natural, context-aware conversation.
 - **Installment Calculator**: Dynamic calculations for 3, 6, and 12-month payment plans, seamlessly injected into the prompt.
 - **Rule-Based Human Handoff**: Detects specific keywords (e.g., "talk to human", "خدمة العملاء") to seamlessly transition the chat to a human agent, generating an automatic "Agent Briefing Summary".
-- **Modern Gradio UI**: Interactive chat interface with custom dark-theme CSS, HTML product cards (showing ratings, discounts, and prices), and quick-action chips.
+- **Modern Streamlit UI**: Interactive chat interface with custom dark-theme CSS, HTML product cards (showing ratings, discounts, and prices), and quick-action chips.
 
 ## 📂 Project Structure
 
@@ -24,7 +24,7 @@ Intelligent Sales ChatBot/
 │
 ├── .env                       # API Keys (OPEN_ROUTER_KEY, GEMINI_API_KEY)
 ├── .env.example               # Example environment variables file
-├── app.py                     # Entry point for Gradio Frontend
+├── app.py                     # Entry point for Streamlit Frontend
 │
 ├── core/                      # Backend package
 │   ├── config.py              # Environment variables & constants
@@ -32,7 +32,7 @@ Intelligent Sales ChatBot/
 │   ├── retrieval.py           # FAISS + BM25 search engine
 │   ├── llm.py                 # LLM API connections
 │   ├── pipeline.py            # RAG orchestration, memory, and handoff
-│   └── ui.py                  # Gradio frontend components
+│   └── ui.py                  # Streamlit frontend components
 │
 ├── data/                      # Dataset directory
 │   └── products_clean.csv     # Cleaned e-commerce dataset
@@ -41,6 +41,7 @@ Intelligent Sales ChatBot/
 │   ├── faiss.index            # FAISS dense search index
 │   └── bm25_index.pkl         # Pickled BM25 keyword search index
 │
+├── requirements.txt           # Project dependencies
 └── notebooks/                 # Jupyter notebooks for data exploration and testing
     ├── 01_data_exploration.ipynb
     └── 02_full_pipeline.ipynb
@@ -57,7 +58,7 @@ Intelligent Sales ChatBot/
 2. **Install dependencies:**
    Make sure you have Python installed, then install the required packages:
    ```bash
-   pip install gradio faiss-cpu sentence-transformers rank-bm25 pandas numpy torch transformers langchain-openai langchain-core requests python-dotenv
+   pip install -r requirements.txt
    ```
 
 3. **Set up Environment Variables:**
@@ -70,11 +71,11 @@ Intelligent Sales ChatBot/
 4. **Run the Application:**
    Unlike previous versions, there is no need to manually run data pipelines. The script will automatically load `products_clean.csv` and build the FAISS and BM25 indexes on startup.
    ```bash
-   python app.py
+   streamlit run app.py
    ```
 
 5. **Access the ChatBot:**
-   Open your browser and navigate to the local Gradio server URL provided in the terminal (usually `http://localhost:7860`).
+   Open your browser and navigate to the local Streamlit server URL provided in the terminal (usually `http://localhost:8501`).
 
 ## 📊 Dataset
 

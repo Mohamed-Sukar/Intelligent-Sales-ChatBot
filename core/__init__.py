@@ -3,7 +3,7 @@ from core.data_loader import load_products_from_csv
 from core.retrieval import SalesRetrievalEngine
 from core.llm import LLMManager
 from core.pipeline import RAGPipeline
-from core.ui import render_app, create_app
+from core.ui import render_app
 
 __all__ = [
     "get_secret",
@@ -12,5 +12,4 @@ __all__ = [
     "LLMManager",
     "RAGPipeline",
     "render_app",
-    "create_app",
 ]

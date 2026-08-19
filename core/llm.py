@@ -16,14 +16,14 @@ class LLMManager:
     def __init__(
         self,
         openrouter_model: str = None,
-        gemini_model: str = "gemini-2.5-flash",
+        gemini_model: str = "gemini-3.6-flash",
         temperature: float = 0.2,
         timeout: int = 10,
     ) -> None:
         self.openrouter_model = openrouter_model or os.getenv(
             "OPENROUTER_MODEL", "cohere/north-mini-code:free"
         )
-        self.gemini_model = gemini_model
+        self.gemini_model = os.getenv("GEMINI_MODEL") or gemini_model
         self.gemini_key = get_secret("GEMINI_API_KEY")
         self.gemini_url = (
             f"https://generativelanguage.googleapis.com/v1beta/models/"
