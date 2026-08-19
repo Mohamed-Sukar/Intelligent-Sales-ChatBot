@@ -29,7 +29,7 @@ class LLMManager:
             f"https://generativelanguage.googleapis.com/v1beta/models/"
             f"{self.gemini_model}:generateContent"
         )
-        self.primary_llm = ChatOpenAI(
+        self.secondary_llm = ChatOpenAI(
             model=self.openrouter_model,
             openai_api_key=get_secret("OPEN_ROUTER_KEY") or "not-set",
             openai_api_base="https://openrouter.ai/api/v1",
@@ -41,22 +41,22 @@ class LLMManager:
 
     def chat(self, system_prompt: str, user_prompt: str) -> Dict[str, str]:
         try:
-            messages = [SystemMessage(content=system_prompt), HumanMessage(content=user_prompt)]
-            response = self.primary_llm.invoke(messages)
-            self.usage_log.append({"source": "openrouter", "status": "success"})
+            text = self._call_gemini(system_prompt, user_prompt)
+            self.usage_log.append({"source": "gemini", "status": "success"})
             if len(self.usage_log) > 500:
                 self.usage_log.pop(0)
-            return {"content": response.content, "source": "openrouter", "status": "success"}
+            return {"content": text, "source": "gemini", "status": "success"}
         except Exception as e:
-            logger.error(f"[LLMManager] OpenRouter failed: {e}")
+            logger.error(f"[LLMManager] Gemini failed: {e}")
             try:
-                text = self._call_gemini(system_prompt, user_prompt)
-                self.usage_log.append({"source": "gemini_backup", "status": "fallback"})
+                messages = [SystemMessage(content=system_prompt), HumanMessage(content=user_prompt)]
+                response = self.secondary_llm.invoke(messages)
+                self.usage_log.append({"source": "openrouter_backup", "status": "fallback"})
                 if len(self.usage_log) > 500:
                     self.usage_log.pop(0)
-                return {"content": text, "source": "gemini_backup", "status": "fallback"}
+                return {"content": response.content, "source": "openrouter_backup", "status": "fallback"}
             except Exception as e2:
-                logger.error(f"[LLMManager] Gemini also failed: {e2}")
+                logger.error(f"[LLMManager] OpenRouter also failed: {e2}")
                 self.usage_log.append({"source": "none", "status": "failed"})
                 if len(self.usage_log) > 500:
                     self.usage_log.pop(0)
@@ -68,7 +68,7 @@ class LLMManager:
         url = f"{self.gemini_url}?key={self.gemini_key}"
         payload = {
             "contents": [{"parts": [{"text": f"{system_prompt}\n\nUser: {user_prompt}"}]}],
-            "generationConfig": {"temperature": 0.2, "maxOutputTokens": 500},
+            "generationConfig": {"temperature": 0.2, "maxOutputTokens": 4096},
         }
         r = requests.post(url, json=payload, timeout=15)
         r.raise_for_status()

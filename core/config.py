@@ -37,7 +37,7 @@ DEFAULT_CSV_CANDIDATES = [
 ]
 TEXT_COLUMNS = [
     "title", "category", "product_description", "product_specifications",
-    "what_customers_said", "currency", "seller_name",
+    "what_customers_said", "currency", "seller_name", "images"
 ]
 NUMERIC_COLUMNS = ["final_price", "initial_price", "discount", "rating", "ratings_count"]
 

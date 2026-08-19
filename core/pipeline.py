@@ -15,7 +15,8 @@ Rules:
 5. When the user describes a support problem, acknowledge it clearly and offer appropriate next steps.
 6. Show a supplied installment plan accurately; do not invent plan terms. You may also state the store's general installment durations/rates (given below) even when no specific dollar plan has been computed for a product.
 7. Recommend related products only when they are supported by the retrieved product data.
-8. Reply in the same language the user wrote in (Arabic or English)."""
+8. Reply in the same language the user wrote in (Arabic or English).
+9. IMPORTANT: ALWAYS format your responses using Markdown. When listing products, features, or categories, you MUST use nicely spaced bullet points (- or *) or numbered lists. NEVER output large comma-separated paragraphs."""
 
     def build_prompt(
         self,
@@ -165,6 +166,14 @@ class ConversationMemory:
 
 
 class HumanHandoffPolicy:
+    def __init__(self):
+        try:
+            from vaderSentiment.vaderSentiment import SentimentIntensityAnalyzer
+            self.analyzer = SentimentIntensityAnalyzer()
+        except ImportError:
+            print("[WARNING] vaderSentiment not installed. Sentiment analysis will be disabled.")
+            self.analyzer = None
+
     _EXPLICIT_REQUEST_PHRASES = (
         "talk to a human", "speak to a human", "talk to a person",
         "speak to a person", "human agent", "live agent",
@@ -179,13 +188,35 @@ class HumanHandoffPolicy:
         "\u0623\u062a\u0643\u0644\u0645 \u0645\u0639 \u062d\u062f",
         "\u0645\u0648\u0638\u0641",
     )
+    
+    _FRUSTRATION_PHRASES = (
+        "sucks", "shit", "terrible", "worst", "garbage", "trash", "fuck", 
+        "stupid", "idiot", "hate", "awful", "scam", "bs", "bullshit",
+        "زفت", "خرا", "نصب", "حرامية", "سيء", "أسوأ", "زبالة", "غبي", "نصابين", "قرف"
+    )
 
     def evaluate(self, user_message: str, request_handoff: bool = False) -> Optional[str]:
         if request_handoff:
             return "frontend_request"
         normalized = " ".join((user_message or "").casefold().split())
+        
         if any(phrase in normalized for phrase in self._EXPLICIT_REQUEST_PHRASES):
             return "explicit_customer_request"
+            
+        import re
+        for phrase in self._FRUSTRATION_PHRASES:
+            # For English words, use word boundaries to avoid false positives (e.g. 'shit' in 'shitsu')
+            # For Arabic, simple inclusion is generally fine or we can rely on standard \b
+            pattern = r'\b' + re.escape(phrase) + r'\b' if phrase.isascii() else re.escape(phrase)
+            if re.search(pattern, normalized, re.IGNORECASE):
+                return "customer_frustration_keyword"
+                
+        # VADER Sentiment Analysis
+        if self.analyzer and user_message.strip():
+            scores = self.analyzer.polarity_scores(user_message)
+            if scores.get("compound", 0) <= -0.5:
+                return "customer_frustration_vader"
+
         return None
 
 
@@ -213,6 +244,13 @@ class RAGPipeline:
         self.prompt_builder = prompt_builder or PromptBuilder()
         self.memory = memory or ConversationMemory()
         self.handoff_policy = handoff_policy or HumanHandoffPolicy()
+        self._quick_action_cache: Dict[str, Dict[str, Any]] = {}
+        self.STATIC_PROMPTS = {
+            "What are the best trending products right now?",
+            "Show me budget-friendly products under $20",
+            "What categories of products do you have?",
+            "What installment plans do you offer?",
+        }
 
     def process_message(
         self,
@@ -220,8 +258,14 @@ class RAGPipeline:
         session_id: str,
         request_handoff: bool = False,
         installment_months: Optional[int] = None,
+        suppress_auto_handoff: bool = False,
     ) -> Dict[str, Any]:
         handoff_reason = self.handoff_policy.evaluate(user_message, request_handoff)
+        
+        # UI Logic Support: Ignore automatic frustration handoff if suppressed (for the 2-strike system)
+        if handoff_reason and suppress_auto_handoff and not request_handoff:
+            handoff_reason = None
+
         self.memory.save_message(session_id, "user", user_message)
 
         if handoff_reason:
@@ -232,6 +276,15 @@ class RAGPipeline:
                 "summary_for_agent": summary,
                 "handoff_reason": handoff_reason,
             }
+            
+        clean_msg = user_message.strip() if user_message else ""
+        if clean_msg in self.STATIC_PROMPTS:
+            if clean_msg in self._quick_action_cache:
+                cached_resp = self._quick_action_cache[clean_msg]
+                self.memory.save_message(session_id, "bot", cached_resp["message"])
+                if cached_resp.get("products"):
+                    self.memory.add_viewed_products(session_id, cached_resp["products"][:1])
+                return cached_resp
 
         products = self._retrieve_products(user_message)
         installment_info = self._build_installment_plan(session_id, installment_months)
@@ -265,13 +318,18 @@ class RAGPipeline:
         if surfaced_products:
             self.memory.add_viewed_products(session_id, surfaced_products[:1])
 
-        return {
+        response_dict = {
             "type": "response",
             "message": llm_response["content"],
             "products": surfaced_products,
             "installment": installment_info,
             "llm_source": llm_response["source"],
         }
+        
+        if clean_msg in self.STATIC_PROMPTS:
+            self._quick_action_cache[clean_msg] = response_dict
+            
+        return response_dict
 
     def _filter_surfaced_products(
         self, products: List[Dict[str, Any]], llm_content: str
